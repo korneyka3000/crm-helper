@@ -1,269 +1,69 @@
-# CRM Helper
+# CRM Helper Automation
 
-Automated CRM activity management tool using Playwright for browser automation.
+A robust, self-healing automation tool for managing CRM activities. It automatically processes "Planned" activities, marks them as "Held", and creates copies with dates distributed evenly across future workdays.
 
-## Overview
+## 🚀 Features
 
-CRM Helper automates the process of updating planned activities in the CRM system at https://mysigma.support/activities/. The tool:
-- Logs into the CRM system
-- Processes all users across all pages
-- Finds activities with "Planned" status
-- Marks them as "HELD" and creates copies with new dates
-- Distributes dates evenly across weekdays (Mon-Fri)
-- Generates reports and logs
+*   **Smart Processing**: Works directly from the Activities list for maximum speed.
+*   **Load Balancing**: Distributes new activities evenly across available weekdays (Mon-Fri) using a Round-Robin algorithm.
+*   **Self-Healing**: Automatically detects and closes stuck modals or popups to prevent crashes.
+*   **Robust Selectors**: Uses structural detection to handle dynamic IDs and Vue.js interfaces.
+*   **Pagination Support**: Handles multi-page lists automatically.
 
-## Features
+## 📋 Prerequisites
 
-- **Automated Processing**: Handles all users across paginated lists
-- **Smart Date Distribution**: Even distribution across weekdays (excludes weekends)
-- **Robust Error Handling**: Continues processing on errors
-- **Comprehensive Logging**: Dual logging (console + file)
-- **Detailed Reports**: JSON reports for users without planned activities
-- **Headless Mode**: Runs in background without UI
+*   Python 3.12+
+*   `uv` (modern Python package manager)
 
-## Prerequisites
+## 🛠️ Setup
 
-- Python 3.14+
-- uv package manager
-- Internet connection
+1.  **Clone the repository**
+2.  **Install dependencies**:
+    ```bash
+    uv sync
+    ```
+3.  **Install Playwright browsers**:
+    ```bash
+    uv run playwright install chromium
+    ```
+4.  **Configure Environment**:
+    Create a `.env` file in the root directory:
+    ```env
+    LOGIN=your_email@example.com
+    PASSWORD=your_password
+    BASE_URL=https://mysigma.support
+    ```
 
-## Installation
+## ⚙️ Configuration
 
-1. Clone the repository and navigate to the project directory
+You can tweak settings in `src/config.py` or via environment variables:
 
-2. Install dependencies:
-```bash
-uv sync
-```
+*   `START_DATE`: Start of the scheduling window (e.g., 2026-08-24)
+*   `END_DATE`: End of the scheduling window (e.g., 2026-09-30)
+*   `HEADLESS`: Set to `False` to watch the browser in action (default: `True`).
 
-3. Install Playwright browsers:
-```bash
-uv run playwright install chromium
-```
+## ▶️ Usage
 
-4. Configure credentials in `.env` file (already exists):
-```env
-LOGIN=your_email@example.com
-PASSWORD=your_password
-```
-
-## Configuration
-
-Edit `.env` file or use environment variables to configure:
-
-```env
-# Required
-LOGIN=your_email@example.com
-PASSWORD=your_password
-
-# Optional (with defaults)
-BASE_URL=https://mysigma.support
-HEADLESS=true
-TIMEOUT_DEFAULT=30000
-TIMEOUT_NAVIGATION=60000
-START_DATE=2026-08-24
-END_DATE=2026-09-30
-LOG_LEVEL=INFO
-```
-
-## IMPORTANT: Selector Configuration
-
-Before first run, you need to update selectors in the automation modules:
-
-1. Run Playwright codegen to inspect the CRM website:
-```bash
-uv run playwright codegen https://mysigma.support/accounts
-```
-
-2. Update selectors in these files:
-   - `src/automation/auth.py` - Login form selectors
-   - `src/automation/activities_page.py` - User list and pagination selectors
-   - `src/automation/user_processor.py` - Activity table and modal selectors
-
-Look for `# TODO: Update these selectors` comments in each file.
-
-## Usage
-
-### Basic Run
+Run the main automation script:
 
 ```bash
-uv run python main.py
+uv run main.py
 ```
 
-### Debug Mode (Visible Browser)
+The script will:
+1.  Login to the CRM.
+2.  Navigate to the Activities page.
+3.  Iterate through all pages.
+4.  Find "PLANNED" activities.
+5.  Mark them as "HELD".
+6.  Create a copy for a future date.
+7.  Generate a summary report in `output/`.
 
-Edit `.env` and set:
-```env
-HEADLESS=false
-```
+## 📂 Output
 
-Then run:
-```bash
-uv run python main.py
-```
+*   **Logs**: Detailed logs are saved in `logs/` directory.
+*   **Reports**: JSON summaries of processed users are saved in `output/`.
 
-## Project Structure
+## 🤖 For Developers
 
-```
-crm-helper/
-├── .env                          # Configuration (credentials)
-├── main.py                       # Entry point
-├── logs/                         # Log files
-│   └── crm_automation_*.log
-├── output/                       # JSON reports
-│   ├── users_without_planned_*.json
-│   └── processing_report_*.json
-└── src/
-    ├── config.py                 # Configuration management
-    ├── logger.py                 # Logging setup
-    ├── date_distributor.py       # Date distribution logic
-    ├── automation/
-    │   ├── browser.py            # Browser management
-    │   ├── auth.py               # Authentication
-    │   ├── activities_page.py   # Page navigation
-    │   └── user_processor.py    # User processing
-    └── models/
-        └── user.py               # Data models
-```
-
-## Workflow
-
-1. **Login**: Authenticates with provided credentials
-2. **Navigate**: Goes to activities page
-3. **Iterate Pages**: Processes all pagination pages
-4. **For Each User**:
-   - Opens user detail
-   - Finds activities with "Planned" status
-   - Marks each as "HELD"
-   - Clicks "Copy" button
-   - Fills modal:
-     - Description: "!!!"
-     - Start: Next weekday date (YYYY-MM-DD 00:00)
-   - Saves and closes modal
-   - Reloads page to refresh list
-5. **Generate Reports**: Creates JSON files with results
-
-## Output Files
-
-### Users Without Planned Activities
-`output/users_without_planned_YYYYMMDD_HHMMSS.json`
-```json
-[
-  {"user_index": 5},
-  {"user_index": 12}
-]
-```
-
-### Processing Report
-`output/processing_report_YYYYMMDD_HHMMSS.json`
-```json
-{
-  "total_users": 50,
-  "successful_users": 48,
-  "failed_users": 2,
-  "users_without_planned": [5, 12],
-  "total_activities_processed": 120,
-  "errors": [...],
-  "execution_time": 1234.56
-}
-```
-
-### Log Files
-`logs/crm_automation_YYYYMMDD_HHMMSS.log`
-
-Contains detailed execution logs with timestamps, debug info, and error traces.
-
-## Date Distribution
-
-The tool distributes activity dates evenly across weekdays (Monday-Friday) from August 24, 2026 to September 30, 2026:
-
-- **Algorithm**: Round-robin distribution
-- **Weekdays Only**: Automatically excludes weekends
-- **Even Distribution**: Each date gets approximately equal number of activities
-- **Format**: YYYY-MM-DD 00:00
-
-Example: If there are 27 weekdays and 54 activities, each date gets 2 activities.
-
-## Error Handling
-
-The tool is designed to be resilient:
-
-- **Authentication Errors**: Stops execution, logs error
-- **User Processing Errors**: Logs error, continues with next user
-- **Timeout Errors**: Logs warning, continues
-- **Unexpected Errors**: Logs full traceback, continues
-
-All errors are logged to both console and log file.
-
-## Troubleshooting
-
-### Login Fails
-- Verify credentials in `.env`
-- Check if selectors in `auth.py` are correct
-- Run with `HEADLESS=false` to see what's happening
-
-### No Users Found
-- Check selectors in `activities_page.py`
-- Verify you're on correct URL
-- Check browser console for JavaScript errors
-
-### Activities Not Processing
-- Update selectors in `user_processor.py`
-- Check if "Planned" status text matches exactly
-- Verify modal form field names
-
-### Timeout Errors
-- Increase timeouts in `.env`:
-  ```env
-  TIMEOUT_DEFAULT=60000
-  TIMEOUT_NAVIGATION=90000
-  ```
-
-## Performance
-
-Expected execution times:
-- Login: ~5 seconds
-- Per user: ~10-20 seconds (depends on activity count)
-- Page navigation: ~3 seconds
-- **Total for 100 users: ~20-30 minutes**
-
-## Development
-
-### Adding New Features
-
-1. Update relevant module in `src/`
-2. Update tests (when implemented)
-3. Update README
-
-### Testing Selectors
-
-Use Playwright's inspector:
-```bash
-uv run playwright codegen https://mysigma.support/activities/
-```
-
-### Debugging
-
-1. Set `HEADLESS=false` in `.env`
-2. Set `LOG_LEVEL=DEBUG` in `.env`
-3. Add breakpoints or `await page.pause()` in code
-4. Run with:
-```bash
-uv run python main.py
-```
-
-## Safety Features
-
-- Credentials stored in `.env` (not in code)
-- `.env` added to `.gitignore` (won't be committed)
-- Readonly `.gitignore` entries for logs and output
-- Comprehensive error logging for debugging
-- Graceful shutdown on errors
-
-## License
-
-Private project - not for redistribution
-
-## Support
-
-For issues or questions, contact the development team.
+See [AGENTS.md](AGENTS.md) for detailed architectural documentation, selector strategies, and internal logic description.

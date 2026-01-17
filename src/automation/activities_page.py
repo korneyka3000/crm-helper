@@ -9,14 +9,13 @@ class ActivitiesPage:
     Manages user list, pagination, and page reloading.
     """
 
-    # TODO: Update these selectors using playwright codegen
-    # Run: playwright codegen https://mysigma.support/activities/
+    # Updated selectors based on inspection of https://mysigma.support/activities/
     SELECTORS = {
-        "user_row": 'tr.user-row, .user-item, [data-user-row]',  # Rows representing users
-        "user_list_container": 'table.users, .user-list, #user-list',  # Container of user list
-        "next_page_button": 'button:has-text("Next"), a[rel="next"], .pagination-next',  # Next page button
-        "pagination_info": '.pagination-info, .page-info',  # Pagination info (e.g., "Page 1 of 5")
-        "loading_indicator": '.loading, .spinner, [data-loading]',  # Loading indicator
+        "user_row": '#activity-table-false tbody tr:not(:has-text("Loading"))',  # Rows in the activities table
+        "user_list_container": '#activity-table-false',
+        "next_page_button": 'li.pagination__item:not(.disabled) a:has-text("Next"), a.pagination__link:has-text("Next")',
+        "pagination_info": '.pagination-info, .page-info',
+        "loading_indicator": '.loading, .spinner, [data-loading]',
     }
 
     def __init__(self, page: Page, logger: logging.Logger):
@@ -40,7 +39,7 @@ class ActivitiesPage:
         """
         try:
             self.logger.info(f"Navigating to activities page: {activities_url}")
-            await self.page.goto(activities_url, wait_until="networkidle", timeout=timeout)
+            await self.page.goto(activities_url, wait_until="domcontentloaded", timeout=timeout)
 
             # Wait for user list to load
             await self.page.wait_for_selector(
@@ -48,7 +47,7 @@ class ActivitiesPage:
                 state="visible",
                 timeout=timeout
             )
-
+            await self.page.wait_for_timeout(1000)
             self.logger.info("Activities page loaded successfully")
 
         except PlaywrightTimeoutError as e:
@@ -68,6 +67,13 @@ class ActivitiesPage:
         try:
             user_rows = self.page.locator(self.SELECTORS["user_row"])
             count = await user_rows.count()
+            
+            # If 0, maybe it's still loading? Wait a bit and try again
+            if count == 0:
+                self.logger.debug("0 users found, waiting 2s to double check...")
+                await self.page.wait_for_timeout(2000)
+                count = await user_rows.count()
+                
             self.logger.debug(f"Found {count} users on current page")
             return count
 
@@ -122,11 +128,15 @@ class ActivitiesPage:
             # Click and wait for navigation
             await next_button.click()
 
-            # Wait for page to update (wait for loading indicator to disappear or user list to reload)
-            await self.page.wait_for_load_state("networkidle", timeout=timeout)
-
-            # Brief wait for content to settle
-            await self.page.wait_for_timeout(2000)
+            # Wait for page to update (use simple timeout instead of networkidle which can hang)
+            # 5 seconds is usually enough for AJAX pagination
+            await self.page.wait_for_timeout(3000)
+            
+            # Wait for rows to be present
+            try:
+                await self.page.wait_for_selector(self.SELECTORS["user_row"], state="visible", timeout=10000)
+            except Exception:
+                self.logger.warning("Waited for next page rows but they didn't appear (might be empty page)")
 
             self.logger.info("Successfully navigated to next page")
             return True

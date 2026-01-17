@@ -125,9 +125,10 @@ async def main():
                     )
 
                 finally:
-                    # CRITICAL: Reload page after each user to refresh the list
-                    logger.debug("Reloading page...")
-                    await activities_page.reload()
+                    # Do not reload page if successful, as it might shift rows
+                    # Only reload if we encountered a major error or need to refresh state
+                    # But for list processing, static page is better
+                    pass
 
             # Check for next page
             has_next = await activities_page.has_next_page()

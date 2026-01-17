@@ -18,3 +18,7 @@ output/
 
 # Environment variables
 .env
+
+.idea
+.zed
+.vscode
