@@ -10,3 +10,23 @@ dependencies = [
     "pydantic>=2.5.0",
     "pydantic-settings>=2.1.0",
 ]
+
+[dependency-groups]
+def = [
+    "ty>=0.0.12",
+]
+dev = [
+    "ruff>=0.14.13",
+]
+
+
+[tool.ruff]
+line-length = 100
+output-format = "concise"
+
+
+[tool.ty.analysis]
+respect-type-ignore-comments = true
+
+[tool.ty.terminal]
+output-format = "concise"

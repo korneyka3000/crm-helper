@@ -29,8 +29,7 @@ def setup_logger(log_dir: Path, log_level: str = "INFO") -> logging.Logger:
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_format = logging.Formatter(
-        "%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
+        "%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
     console_handler.setFormatter(console_format)
     logger.addHandler(console_handler)
@@ -42,7 +41,7 @@ def setup_logger(log_dir: Path, log_level: str = "INFO") -> logging.Logger:
     file_handler.setLevel(logging.DEBUG)
     file_format = logging.Formatter(
         "%(asctime)s,%(msecs)03d - %(levelname)s - [%(filename)s:%(lineno)d] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
     file_handler.setFormatter(file_format)
     logger.addHandler(file_handler)

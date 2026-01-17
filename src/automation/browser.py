@@ -50,7 +50,7 @@ class BrowserManager:
         # Launch browser (Chromium)
         self.browser = await self.playwright.chromium.launch(
             headless=headless,
-            args=["--disable-blink-features=AutomationControlled"]  # Less detectable
+            args=["--disable-blink-features=AutomationControlled"],  # Less detectable
         )
 
         # Create browser context with custom viewport

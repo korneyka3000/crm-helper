@@ -2,7 +2,6 @@ import asyncio
 import json
 import time
 from datetime import datetime
-from pathlib import Path
 
 from src.config import Config
 from src.logger import setup_logger
@@ -31,13 +30,9 @@ async def main():
     logger.info("=" * 60)
 
     # 3. Initialize date distributor
-    logger.info(
-        f"Date range: {config.start_date} to {config.end_date}"
-    )
+    logger.info(f"Date range: {config.start_date} to {config.end_date}")
     date_distributor = DateDistributor(config.start_date, config.end_date)
-    logger.info(
-        f"Available weekdays: {date_distributor.get_weekday_count()}"
-    )
+    logger.info(f"Available weekdays: {date_distributor.get_weekday_count()}")
 
     # 4. Initialize browser
     browser_mgr = BrowserManager()
@@ -107,21 +102,15 @@ async def main():
                         else:
                             logger.info(f"○ User {user_idx}: No planned activities")
                     else:
-                        logger.error(
-                            f"✗ User {user_idx}: Failed - {result.error_message}"
-                        )
+                        logger.error(f"✗ User {user_idx}: Failed - {result.error_message}")
 
                 except Exception as e:
                     logger.error(
                         f"✗ User {user_idx} on page {page_num}: Unexpected error - {e}",
-                        exc_info=True
+                        exc_info=True,
                     )
                     processed_users.append(
-                        UserResult(
-                            user_index=user_idx,
-                            success=False,
-                            error_message=str(e)
-                        )
+                        UserResult(user_index=user_idx, success=False, error_message=str(e))
                     )
 
                 finally:
@@ -171,9 +160,7 @@ async def main():
             successful_users=sum(1 for u in processed_users if u.success),
             failed_users=sum(1 for u in processed_users if not u.success),
             users_without_planned=[u["user_index"] for u in users_without_planned],
-            total_activities_processed=sum(
-                u.activities_processed for u in processed_users
-            ),
+            total_activities_processed=sum(u.activities_processed for u in processed_users),
             errors=errors,
             execution_time=execution_time,
         )
@@ -207,7 +194,9 @@ async def main():
         logger.info("Browser closed")
 
         execution_time = time.time() - start_time
-        logger.info(f"\nTotal execution time: {execution_time:.2f}s ({execution_time / 60:.2f} minutes)")
+        logger.info(
+            f"\nTotal execution time: {execution_time:.2f}s ({execution_time / 60:.2f} minutes)"
+        )
         logger.info("=" * 60)
 
 

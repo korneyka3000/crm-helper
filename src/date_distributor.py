@@ -24,9 +24,7 @@ class DateDistributor:
         self.current_index: int = 0
 
         if not self.weekdays:
-            raise ValueError(
-                f"No weekdays found in range {start_date} to {end_date}"
-            )
+            raise ValueError(f"No weekdays found in range {start_date} to {end_date}")
 
     def _calculate_weekdays(self) -> List[date]:
         """

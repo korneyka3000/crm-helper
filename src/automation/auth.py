@@ -55,9 +55,7 @@ class Authenticator:
             self.logger.debug("Waiting for login form")
             # Wait for username field to appear
             await self.page.wait_for_selector(
-                self.SELECTORS["username_field"],
-                state="visible",
-                timeout=timeout
+                self.SELECTORS["username_field"], state="visible", timeout=timeout
             )
 
             self.logger.debug("Filling username field")
@@ -102,7 +100,7 @@ class Authenticator:
         except Exception:
             return False
 
-    async def logout(self, logout_url: str = None) -> bool:
+    async def logout(self, logout_url: str | None = None) -> bool:
         """
         Perform logout (optional functionality).
 
@@ -117,6 +115,7 @@ class Authenticator:
                 await self.page.goto(logout_url)
                 self.logger.info("Logged out successfully")
                 return True
+            return False
         except Exception as e:
             self.logger.error(f"Logout error: {e}")
             return False
