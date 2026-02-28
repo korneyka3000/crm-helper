@@ -1,5 +1,8 @@
 import logging
-from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
+from typing import ClassVar
+
+from playwright.async_api import Page
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
 
 class Authenticator:
@@ -10,7 +13,7 @@ class Authenticator:
     """
 
     # Selectors discovered via automated inspection
-    SELECTORS = {
+    SELECTORS: ClassVar[dict[str, str]] = {
         "username_field": 'input[placeholder*="Login" i]',  # Login field with placeholder
         "password_field": 'input[type="password"]',  # Password field
         "submit_button": 'button:has-text("Login")',  # Login button

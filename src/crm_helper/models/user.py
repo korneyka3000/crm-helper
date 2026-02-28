@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any, ClassVar
+
 from pydantic import BaseModel, Field
 
 
@@ -8,16 +9,16 @@ class UserResult(BaseModel):
     """Result of processing a single user."""
 
     user_index: int = Field(..., description="Index of the user in the list")
-    user_name: Optional[str] = Field(None, description="Name of the user (if available)")
+    user_name: str | None = Field(None, description="Name of the user (if available)")
     has_planned_activities: bool = Field(
         default=False, description="Whether user had planned activities"
     )
     activities_processed: int = Field(default=0, description="Number of activities processed")
     success: bool = Field(default=True, description="Whether processing was successful")
-    error_message: Optional[str] = Field(None, description="Error message if processing failed")
+    error_message: str | None = Field(None, description="Error message if processing failed")
 
     class Config:
-        json_schema_extra = {
+        json_schema_extra: ClassVar[dict[str, Any]] = {
             "example": {
                 "user_index": 5,
                 "user_name": "John Doe",
@@ -35,11 +36,11 @@ class ProcessingReport(BaseModel):
     total_users: int = Field(..., description="Total number of users processed")
     successful_users: int = Field(..., description="Number of successfully processed users")
     failed_users: int = Field(..., description="Number of failed user processing attempts")
-    users_without_planned: List[int] = Field(
+    users_without_planned: list[int] = Field(
         default_factory=list, description="User indices without planned activities"
     )
     total_activities_processed: int = Field(default=0, description="Total activities processed")
-    errors: List[Dict[str, Any]] = Field(
+    errors: list[dict[str, Any]] = Field(
         default_factory=list, description="List of errors encountered"
     )
     execution_time: float = Field(..., description="Total execution time in seconds")
@@ -79,7 +80,8 @@ class ProcessingReport(BaseModel):
             summary.append(f"\nErrors encountered: {len(self.errors)}")
             for i, error in enumerate(self.errors[:5], 1):  # Show first 5 errors
                 summary.append(
-                    f"  {i}. User {error.get('user_index', 'unknown')}: {error.get('message', 'Unknown error')}"
+                    f"  {i}. User {error.get('user_index', 'unknown')}: "
+                    f"{error.get('message', 'Unknown error')}"
                 )
             if len(self.errors) > 5:
                 summary.append(f"  ... and {len(self.errors) - 5} more errors")

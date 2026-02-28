@@ -1,5 +1,8 @@
 import logging
-from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
+from typing import ClassVar
+
+from playwright.async_api import Page
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
 
 class ActivitiesPage:
@@ -10,10 +13,13 @@ class ActivitiesPage:
     """
 
     # Updated selectors based on inspection of https://mysigma.support/activities/
-    SELECTORS = {
-        "user_row": '#activity-table-false tbody tr:not(:has-text("Loading"))',  # Rows in the activities table
+    SELECTORS: ClassVar[dict[str, str]] = {
+        "user_row": '#activity-table-false tbody tr:not(:has-text("Loading"))',
         "user_list_container": "#activity-table-false",
-        "next_page_button": 'li.pagination__item:not(.disabled) a:has-text("Next"), a.pagination__link:has-text("Next")',
+        "next_page_button": (
+            'li.pagination__item:not(.disabled) a:has-text("Next"),'
+            ' a.pagination__link:has-text("Next")'
+        ),
         "pagination_info": ".pagination-info, .page-info",
         "loading_indicator": ".loading, .spinner, [data-loading]",
     }

@@ -3,14 +3,14 @@ import json
 import time
 from datetime import datetime
 
-from src.config import Config
-from src.logger import setup_logger
-from src.date_distributor import DateDistributor
-from src.models.user import UserResult, ProcessingReport
-from src.automation.browser import BrowserManager
-from src.automation.auth import Authenticator
-from src.automation.activities_page import ActivitiesPage
-from src.automation.user_processor import UserProcessor
+from crm_helper.automation.activities_page import ActivitiesPage
+from crm_helper.automation.auth import Authenticator
+from crm_helper.automation.browser import BrowserManager
+from crm_helper.automation.user_processor import UserProcessor
+from crm_helper.config import Config
+from crm_helper.date_distributor import DateDistributor
+from crm_helper.logger import setup_logger
+from crm_helper.models.user import ProcessingReport, UserResult
 
 
 async def main():
@@ -31,7 +31,7 @@ async def main():
 
     # 3. Initialize date distributor
     logger.info(f"Date range: {config.start_date} to {config.end_date}")
-    date_distributor = DateDistributor(config.start_date, config.end_date)
+    date_distributor = DateDistributor(config.start_date, config.end_date, holidays=config.holidays)
     logger.info(f"Available weekdays: {date_distributor.get_weekday_count()}")
 
     # 4. Initialize browser
@@ -97,7 +97,8 @@ async def main():
                     if result.success:
                         if result.has_planned_activities:
                             logger.info(
-                                f"✓ User {user_idx}: {result.activities_processed} activities processed"
+                                f"✓ User {user_idx}: "
+                                f"{result.activities_processed} activities processed"
                             )
                         else:
                             logger.info(f"○ User {user_idx}: No planned activities")

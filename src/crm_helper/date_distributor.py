@@ -1,5 +1,4 @@
 from datetime import date, timedelta
-from typing import List
 
 
 class DateDistributor:
@@ -10,23 +9,25 @@ class DateDistributor:
     across all available weekdays in the specified date range.
     """
 
-    def __init__(self, start_date: date, end_date: date):
+    def __init__(self, start_date: date, end_date: date, holidays: list[date] | None = None):
         """
         Initialize DateDistributor with a date range.
 
         Args:
             start_date: Start date for scheduling range
             end_date: End date for scheduling range
+            holidays: Optional list of dates to exclude (public holidays, etc.)
         """
         self.start_date = start_date
         self.end_date = end_date
-        self.weekdays: List[date] = self._calculate_weekdays()
+        self.holidays: set[date] = set(holidays or [])
+        self.weekdays: list[date] = self._calculate_weekdays()
         self.current_index: int = 0
 
         if not self.weekdays:
             raise ValueError(f"No weekdays found in range {start_date} to {end_date}")
 
-    def _calculate_weekdays(self) -> List[date]:
+    def _calculate_weekdays(self) -> list[date]:
         """
         Calculate all weekdays (Mon-Fri) in the date range.
 
@@ -38,7 +39,7 @@ class DateDistributor:
 
         while current <= self.end_date:
             # isoweekday(): Monday=1, ..., Friday=5, Saturday=6, Sunday=7
-            if current.isoweekday() not in [6, 7]:
+            if current.isoweekday() not in [6, 7] and current not in self.holidays:
                 weekdays.append(current)
             current += timedelta(days=1)
 
@@ -71,7 +72,7 @@ class DateDistributor:
         """Get the total number of weekdays in the range."""
         return len(self.weekdays)
 
-    def get_weekdays(self) -> List[str]:
+    def get_weekdays(self) -> list[str]:
         """
         Get all weekdays as formatted strings.
 

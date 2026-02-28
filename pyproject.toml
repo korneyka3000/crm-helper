@@ -1,32 +1,59 @@
 [project]
 name = "crm-helper"
-version = "0.1.0"
+version = "0.2.0"
 description = "CRM automation tool for processing activities using Playwright"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "playwright>=1.41.0",
-    "python-dotenv>=1.0.0",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
+  "customtkinter>=5.2.0",
+  "playwright>=1.41.0",
+  "pydantic>=2.5.0",
+  "pydantic-settings>=2.1.0",
+  "python-dotenv>=1.0.0",
+  "tkcalendar>=1.6.1",
+  "typer>=0.24.1",
 ]
+
+[project.scripts]
+crm = "crm_helper.cli:app"
 
 [dependency-groups]
-def = [
-    "ty>=0.0.12",
-]
 dev = [
-    "ruff>=0.14.13",
+  "ruff>=0.14.13",
+]
+def = [
+  "ty>=0.0.12",
 ]
 
+[build-system]
+requires = ["uv_build>=0.10.7,<0.11.0"]
+build-backend = "uv_build"
 
 [tool.ruff]
 line-length = 100
 output-format = "concise"
+target-version = "py313"
 
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle errors
+  "F",  # pyflakes
+  "I",  # isort
+  "UP",  # pyupgrade — modernize type hints (List→list, Optional→X|None)
+  "B",  # flake8-bugbear — common bugs
+  "SIM",  # flake8-simplify
+  "C4",  # flake8-comprehensions
+  "RUF",  # ruff-specific rules
+]
+ignore = [
+  "SIM108",  # ternary operator (readability > brevity)
+]
 
 [tool.ty.analysis]
 respect-type-ignore-comments = true
 
 [tool.ty.terminal]
 output-format = "concise"
+
+[tool.uv]
+package = true

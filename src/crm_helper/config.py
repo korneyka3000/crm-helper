@@ -1,5 +1,6 @@
 from datetime import date
 from pathlib import Path
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -31,8 +32,9 @@ class Config(BaseSettings):
     retry_delay: float = Field(default=2.0, description="Retry delay in seconds")
 
     # Date range for activity scheduling
-    start_date: date = Field(default=date(2026, 8, 24), description="Start date for scheduling")
+    start_date: date = Field(default=date(2026, 7, 1), description="Start date for scheduling")
     end_date: date = Field(default=date(2026, 9, 30), description="End date for scheduling")
+    holidays: list[date] = Field(default=[], description="Public holidays to exclude")
 
     # Logging settings
     log_level: str = Field(default="INFO", description="Logging level")

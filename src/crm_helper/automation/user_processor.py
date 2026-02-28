@@ -1,8 +1,10 @@
 import logging
-from playwright.async_api import Page, Locator
+from typing import ClassVar
 
-from src.date_distributor import DateDistributor
-from src.models.user import UserResult
+from playwright.async_api import Locator, Page
+
+from crm_helper.date_distributor import DateDistributor
+from crm_helper.models.user import UserResult
 
 
 class UserProcessor:
@@ -11,7 +13,7 @@ class UserProcessor:
     If action buttons are missing, falls back to opening details.
     """
 
-    SELECTORS = {
+    SELECTORS: ClassVar[dict[str, str]] = {
         # Status (in Activities List)
         # Column 11 (index 10) in the dump was Status
         # But let's be safe and use title="PLANNED"
@@ -59,9 +61,8 @@ class UserProcessor:
             # Check for any lingering modals from previous errors and close them
             await self._ensure_modal_closed()
 
-            # Get the row
-            rows = self.page.locator('#activity-table-false tbody tr:not(:has-text("Loading"))')
-            row = rows.nth(row_index)
+            # Get the row directly by position — O(1) vs O(n) with :not(:has-text) filter
+            row = self.page.locator(f"#activity-table-false tbody tr:nth-child({row_index + 1})")
 
             # Check Status
             # We look for the span with title="PLANNED" anywhere in the row
@@ -126,7 +127,7 @@ class UserProcessor:
                     await self.page.wait_for_selector(
                         self.SELECTORS["modal"], state="hidden", timeout=2000
                     )
-                except:
+                except Exception:
                     self.logger.error("Modal refused to close")
         except Exception as e:
             self.logger.debug(f"Error closing modal: {e}")

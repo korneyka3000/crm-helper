@@ -1,5 +1,4 @@
-from typing import Optional
-from playwright.async_api import async_playwright, Browser, BrowserContext, Page, Playwright
+from playwright.async_api import Browser, BrowserContext, Page, Playwright, async_playwright
 
 
 class BrowserManager:
@@ -10,10 +9,10 @@ class BrowserManager:
     """
 
     def __init__(self):
-        self.playwright: Optional[Playwright] = None
-        self.browser: Optional[Browser] = None
-        self.context: Optional[BrowserContext] = None
-        self.page: Optional[Page] = None
+        self.playwright: Playwright | None = None
+        self.browser: Browser | None = None
+        self.context: BrowserContext | None = None
+        self.page: Page | None = None
 
     async def __aenter__(self) -> "BrowserManager":
         """Enter async context manager."""
